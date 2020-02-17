@@ -10,13 +10,13 @@ using namespace std;
 #include "./header.h"
 
 #define THREADS		2
-#define data_len        gig_size
+#define data_len        two_gig_size
 
 
 int main(int argc, char **argv) {
         // Changing the process scheduling queue into 
         // real-time and set its priority using <sched.h>.
-        set_cpu_scheduler(1,99);
+        set_cpu_scheduler(0,99);
 
         char    *data = new char[data_len],
                 *executor_data = new char[512];

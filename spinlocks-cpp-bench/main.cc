@@ -24,6 +24,10 @@ std::vector<std::chrono::milliseconds> CreateBenchmarkRuns(size_t numRuns, size_
     std::vector<std::chrono::milliseconds> runs(numRuns);
     const size_t numItersPerThread = numItersPerRun/numThreads;
     volatile std::atomic_size_t cnt = {0};
+    // build_iovecs(numThreads, dataInput);
+    // std::cout << "\nlocaliovlen:" << dataInput->local[0].iov_len << ", remoteiovlen:" << dataInput->remote[0].iov_len << ".\n";
+    // std::cout << "\nlocaliovlen:" << dataInput->local[1].iov_len << ", remoteiovlen:" << dataInput->remote[1].iov_len << ".\n";
+
 
     for (size_t i=0; i<numRuns; i++)
     {
@@ -36,7 +40,7 @@ std::vector<std::chrono::milliseconds> CreateBenchmarkRuns(size_t numRuns, size_
         {
             futures[j] = std::async(std::launch::async, [&, j]()
             {
-                BindThisThreadToCore(j);
+                BindThisThreadToCore(j%5 + 1);
 
                 // Wait until all threads are ready
                 numThreadsReady++;
@@ -48,8 +52,22 @@ std::vector<std::chrono::milliseconds> CreateBenchmarkRuns(size_t numRuns, size_
                     //McsLock::QNode node;
                     //lock.Enter(node);
                     lock.Enter();
-                    for (size_t l=0; l<16; l++)
-                        cnt++;
+
+                    // for (size_t h = 0; h < IOV_NUM; h++)
+                    // {
+                        long long nread = process_vm_writev(dataInput->pid, (&dataInput->local[j]), \
+                        1, (&dataInput->remote[j]), 1, 0);
+                        if (nread < 0)
+                        {
+                            /* code */
+                            // std::cout << "thread_num:" << j << ":" << h << " ,write_num:"  << nread << "localiovlen:" << dataInput->local[h].iov_len << ", remoteiovlen:" << dataInput->remote[h].iov_len << ".\n";
+                            perror("process_vm:");
+                        }
+                        // std::cout << "thread_num:" << j << " write_num:"  << nread << "localiovlen:" << dataInput->local[j].iov_len << ", remoteiovlen:" << dataInput->remote[j].iov_len << ".\n";
+                    // }
+
+                    // for (size_t l=0; l<16; l++)
+                    //     cnt++;
                     //lock.Leave(node);
                     lock.Leave();
                 }
@@ -121,7 +139,6 @@ std::vector<std::chrono::milliseconds> CreateBenchmarkRuns(size_t numRuns, size_
 template<typename LockType>
 void RunBenchmark(const char *descr, size_t numRuns, size_t numItersPerRun, size_t numThreads, data_input* dataInput)
 {
-    build_iovecs(numThreads, dataInput);
     const auto &runs = CreateBenchmarkRuns<LockType>(numRuns, numItersPerRun, numThreads, dataInput);
     double avgElapsedMs(0), varianceMs(0), minMs(std::numeric_limits<double>::max()), maxMs(0);
 
@@ -165,8 +182,11 @@ void RunBenchmarks(data_input* dataInput)
 
     for (size_t i=1; i<=std::thread::hardware_concurrency(); i++)
     {
+        // const size_t numRuns = 1;
         const size_t numRuns = 5;
-        const size_t numItersPerRun = 1000000;
+        const size_t numItersPerRun = 10;
+        // const size_t numItersPerRun = 15;
+        build_iovecs(5, dataInput);
 
         std::cout << i << " Threads (work/thread: " << numItersPerRun/i << ")\n\n";
 
@@ -184,8 +204,9 @@ void RunBenchmarks(data_input* dataInput)
 
         RunBenchmark<TicketSpinLock>("TicketSpinLock", numRuns, numItersPerRun, i, dataInput);
         RunBenchmark<PropBoTicketSpinLock>("PropBoTicketSpinLock", numRuns, numItersPerRun, i, dataInput);
-        RunBenchmark<AndersonSpinLock>("AndersonSpinLock", numRuns, numItersPerRun, i, dataInput);
-        //RunBenchmark<GraunkeAndThakkarSpinLock>("GraunkeAndThakkarSpinLock", numRuns, numItersPerRun, i);
+        
+        // RunBenchmark<AndersonSpinLock>("AndersonSpinLock", numRuns, numItersPerRun, i, dataInput);
+        // RunBenchmark<GraunkeAndThakkarSpinLock>("GraunkeAndThakkarSpinLock", numRuns, numItersPerRun, i);
 #if 0
         RunBenchmark<SpinRwLockNaive>("SpinRwLockNaive", numRuns, numItersPerRun, i);
         RunBenchmark<SpinRwLockNaivePerThreadReadCounts>("SpinRwLockNaivePerThreadReadCounts", numRuns, numItersPerRun, i);

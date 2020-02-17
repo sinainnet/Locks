@@ -1,0 +1,74 @@
+                                           Std.                      Time/
+                                 Avg.      dev.    Min      Max      iter.
+Lock type                        (ms)      (ms)    (ms)     (ms)     (ns)
+----------------------------------------------------------------------------
+
+1 Threads (work/thread: 1000000)
+
+Mutex                           701.60     0.49   701.00   702.00   140.32
+SpinLockPThread                 688.80     0.75   688.00   690.00   137.76
+ScTasSpinLock                   711.40     0.49   711.00   712.00   142.28
+TasSpinLock                     713.40     0.49   713.00   714.00   142.68
+TTasSpinLock                    720.00     0.00   720.00   720.00   144.00
+RelaxTTasSpinLock               721.60     0.49   721.00   722.00   144.32
+ExpBoRelaxTTasSpinLock          720.80     0.75   720.00   722.00   144.16
+TicketSpinLock                  713.40     0.49   713.00   714.00   142.68
+PropBoTicketSpinLock            710.80     1.17   710.00   713.00   142.16
+
+2 Threads (work/thread: 500000)
+
+Mutex                           1249.20    53.52   1197.00   1350.00   249.84
+SpinLockPThread                 937.40     4.32   935.00   946.00   187.48
+ScTasSpinLock                   1265.60     1.36   1263.00   1267.00   253.12
+TasSpinLock                     1271.80     0.75   1271.00   1273.00   254.36
+TTasSpinLock                    1048.40    44.10   996.00   1104.00   209.68
+RelaxTTasSpinLock               1128.20    89.69   1020.00   1234.00   225.64
+ExpBoRelaxTTasSpinLock          788.40    12.40   774.00   805.00   157.68
+TicketSpinLock                  863.20     0.40   863.00   864.00   172.64
+PropBoTicketSpinLock            873.60     0.80   873.00   875.00   174.72
+
+3 Threads (work/thread: 333333)
+
+Mutex                           1221.60    40.63   1159.00   1274.00   244.32
+SpinLockPThread                 1229.00    27.84   1179.00   1260.00   245.80
+ScTasSpinLock                   1577.20     2.71   1574.00   1582.00   315.44
+TasSpinLock                     1607.40     0.80   1606.00   1608.00   321.48
+TTasSpinLock                    1322.00    33.96   1287.00   1383.00   264.40
+RelaxTTasSpinLock               1346.00    25.35   1312.00   1383.00   269.20
+ExpBoRelaxTTasSpinLock          888.00     8.32   880.00   904.00   177.60
+TicketSpinLock                  866.40     0.49   866.00   867.00   173.28
+PropBoTicketSpinLock            870.60     0.80   870.00   872.00   174.12
+
+4 Threads (work/thread: 250000)
+
+Mutex                           1068.40    18.53   1032.00   1084.00   213.68
+SpinLockPThread                 1368.00    12.28   1352.00   1387.00   273.60
+ScTasSpinLock                   1967.40     1.02   1966.00   1969.00   393.48
+TasSpinLock                     1981.60     2.42   1978.00   1985.00   396.32
+TTasSpinLock                    1487.80    15.75   1468.00   1514.00   297.56
+RelaxTTasSpinLock               1479.20    35.30   1455.00   1548.00   295.84
+ExpBoRelaxTTasSpinLock          1035.80     3.76   1029.00   1040.00   207.16
+TicketSpinLock                  880.80     0.75   880.00   882.00   176.16
+PropBoTicketSpinLock            876.60     1.62   875.00   879.00   175.32
+
+5 Threads (work/thread: 200000)
+
+Mutex                           1105.20     3.31   1099.00   1109.00   221.04
+SpinLockPThread                 1431.40    11.22   1416.00   1450.00   286.28
+ScTasSpinLock                   2433.00     8.65   2425.00   2445.00   486.60
+TasSpinLock                     2438.20    13.60   2428.00   2464.00   487.64
+TTasSpinLock                    1608.20     7.55   1596.00   1618.00   321.64
+RelaxTTasSpinLock               1603.40     5.95   1598.00   1615.00   320.68
+ExpBoRelaxTTasSpinLock          1185.60     9.31   1175.00   1202.00   237.12
+TicketSpinLock                  903.20     8.45   889.00   915.00   180.64
+PropBoTicketSpinLock            889.80    13.35   877.00   908.00   177.96
+
+6 Threads (work/thread: 166666)
+
+Mutex                           1125.20    18.48   1114.00   1162.00   225.04
+SpinLockPThread                 1699.80    24.64   1666.00   1738.00   339.96
+ScTasSpinLock                   2605.60    76.87   2514.00   2716.00   521.12
+TasSpinLock                     2663.20    94.07   2569.00   2781.00   532.64
+TTasSpinLock                    1791.20    78.99   1687.00   1909.00   358.24
+RelaxTTasSpinLock               1788.20    56.83   1715.00   1886.00   357.64
+ExpBoRelaxTTasSpinLock          1128.60     9.52   1116.00   1143.00   225.72

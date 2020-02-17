@@ -10,7 +10,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
-#define IOV_NUM         512
+#define IOV_NUM         2
 
 struct Data {
   int state;
@@ -151,33 +151,28 @@ void get_inputs (data_input *input_var, int argc, char **argv) {
 }
 
 void build_iovecs(size_t threadNum, data_input *dataInput) {
-        // printf("\n1");
-        int local_iov_num = (long long int)IOV_NUM;
-        // printf("\n1");
+        int local_iov_num = threadNum;
         long long int data_len = dataInput->buffer_length/local_iov_num;
-        // printf("\n1");
+        // printf("build_iovecs:data_len = %lld\n", data_len);
 
-        struct iovec local[local_iov_num];
-        // printf("\n1");
-        struct iovec remote[local_iov_num];
-        // printf("\n1");
+        struct iovec* local = new iovec[local_iov_num];
+        struct iovec* remote = new iovec[local_iov_num];
 
         for (int i = 0; i < local_iov_num; i++)
         {
-                // printf("\n1");
                 char *data = new char[data_len];
-                // printf("\n1");
                 memset(data, char(((int)'a') + i), data_len);
-                // printf("\n1");
-                local[i].iov_base = data;
-                // printf("\n1");
-                local[i].iov_len = data_len;
 
-                // printf("\n1");
+                local[i].iov_base = data;
+                local[i].iov_len = data_len;
+                // printf("build_iovecs:%d:data_len = %lld\n", i, local[i].iov_len);
+
                 remote[i].iov_base = dataInput->remote_ptr + i*data_len*sizeof(char);
-                // printf("\n1");
                 remote[i].iov_len = data_len;
-                // printf("\n1");
+                // printf("build_iovecs:%d:data_len = %lld\n", i, remote[i].iov_len);
 	}
+        dataInput->local = local;
+        dataInput->remote = remote;
+
         return;
 }
