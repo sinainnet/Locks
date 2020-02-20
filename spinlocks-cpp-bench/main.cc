@@ -22,12 +22,10 @@ template<typename LockType>
 std::vector<std::chrono::milliseconds> CreateBenchmarkRuns(size_t numRuns, size_t numItersPerRun, size_t numThreads, data_input* dataInput)
 {
     std::vector<std::chrono::milliseconds> runs(numRuns);
-    const size_t numItersPerThread = numItersPerRun/numThreads;
+    // const size_t numItersPerThread = numItersPerRun/numThreads;
+    const size_t numItersPerThread = numItersPerRun;
     volatile std::atomic_size_t cnt = {0};
     // build_iovecs(numThreads, dataInput);
-    // std::cout << "\nlocaliovlen:" << dataInput->local[0].iov_len << ", remoteiovlen:" << dataInput->remote[0].iov_len << ".\n";
-    // std::cout << "\nlocaliovlen:" << dataInput->local[1].iov_len << ", remoteiovlen:" << dataInput->remote[1].iov_len << ".\n";
-
 
     for (size_t i=0; i<numRuns; i++)
     {
@@ -53,21 +51,17 @@ std::vector<std::chrono::milliseconds> CreateBenchmarkRuns(size_t numRuns, size_
                     //lock.Enter(node);
                     lock.Enter();
 
-                    // for (size_t h = 0; h < IOV_NUM; h++)
-                    // {
-                        long long nread = process_vm_writev(dataInput->pid, (&dataInput->local[j]), \
-                        1, (&dataInput->remote[j]), 1, 0);
-                        if (nread < 0)
-                        {
-                            /* code */
-                            // std::cout << "thread_num:" << j << ":" << h << " ,write_num:"  << nread << "localiovlen:" << dataInput->local[h].iov_len << ", remoteiovlen:" << dataInput->remote[h].iov_len << ".\n";
-                            perror("process_vm:");
-                        }
-                        // std::cout << "thread_num:" << j << " write_num:"  << nread << "localiovlen:" << dataInput->local[j].iov_len << ", remoteiovlen:" << dataInput->remote[j].iov_len << ".\n";
-                    // }
-
-                    // for (size_t l=0; l<16; l++)
+                    long long nread = process_vm_writev(dataInput->pid, (&dataInput->local[j]), 1, (&dataInput->remote[j]), 1, 0);
+                    if (nread < 0)
+                    {
+                        /* code */
+                        // std::cout << "thread_num:" << j << ":" << h << " ,write_num:"  << nread << "localiovlen:" << dataInput->local[h].iov_len << ", remoteiovlen:" << dataInput->remote[h].iov_len << ".\n";
+                        perror("process_vm:");
+                    }
+                        
+                    // for (size_t l=0; l<1600; l++)
                     //     cnt++;
+
                     //lock.Leave(node);
                     lock.Leave();
                 }
@@ -162,31 +156,34 @@ void RunBenchmark(const char *descr, size_t numRuns, size_t numItersPerRun, size
 
     const double stdDevMs = std::sqrt(varianceMs);
     const double avgElapsedNs = avgElapsedMs*1000.0*1000.0;
+    const double avgElapsedMss = avgElapsedMs*1000.0;
     const double timePerIterNs = avgElapsedNs/(numRuns*numItersPerRun);
+    const double timePerIterMs = avgElapsedMss/(numRuns*numItersPerRun);
 
     std::cout << std::left << std::setfill(' ') << std::setw(30) << descr << "  "
               << std::fixed << std::setprecision(2) << std::right << std::setfill(' ') << std::setw(6)
               << avgElapsedMs << "   " << std::right << std::setw(6) << stdDevMs << "   "
               << std::right << std::setw(6) << minMs << "   " << std::right << std::setw(6) << maxMs 
-              << "   " << std::right << std::setw(6) << timePerIterNs << "\n";
+              << "   " << std::right << std::setw(6) << timePerIterNs
+              << "   " << std::right << std::setw(6) << timePerIterMs << "\n";
 }
 
 void RunBenchmarks(data_input* dataInput)
 {
-    std::cout << "                                           Std.                      Time/\n";
-    std::cout << "                                 Avg.      dev.    Min      Max      iter.\n";
-    std::cout << "Lock type                        (ms)      (ms)    (ms)     (ms)     (ns)\n";
-    std::cout << "----------------------------------------------------------------------------\n\n";
+    std::cout << "                                           Std.                      Time/      Time/\n";
+    std::cout << "                                 Avg.      dev.    Min      Max      iter.      iter.\n";
+    std::cout << "Lock type                        (ms)      (ms)    (ms)     (ms)     (ns)       (ms)\n";
+    std::cout << "--------------------------------------------------------------------------------------\n\n";
 
     const auto startTime = std::chrono::high_resolution_clock::now();
 
     for (size_t i=1; i<=std::thread::hardware_concurrency(); i++)
     {
         // const size_t numRuns = 1;
-        const size_t numRuns = 5;
-        const size_t numItersPerRun = 10;
+        const size_t numRuns = 2;
+        const size_t numItersPerRun = 10000000;
         // const size_t numItersPerRun = 15;
-        build_iovecs(5, dataInput);
+        build_iovecs(i, dataInput);
 
         std::cout << i << " Threads (work/thread: " << numItersPerRun/i << ")\n\n";
 
@@ -203,7 +200,8 @@ void RunBenchmarks(data_input* dataInput)
         RunBenchmark<ExpBoRelaxTTasSpinLock>("ExpBoRelaxTTasSpinLock", numRuns, numItersPerRun, i, dataInput);
 
         RunBenchmark<TicketSpinLock>("TicketSpinLock", numRuns, numItersPerRun, i, dataInput);
-        RunBenchmark<PropBoTicketSpinLock>("PropBoTicketSpinLock", numRuns, numItersPerRun, i, dataInput);
+
+        // RunBenchmark<PropBoTicketSpinLock>("PropBoTicketSpinLock", numRuns, numItersPerRun, i, dataInput);
         
         // RunBenchmark<AndersonSpinLock>("AndersonSpinLock", numRuns, numItersPerRun, i, dataInput);
         // RunBenchmark<GraunkeAndThakkarSpinLock>("GraunkeAndThakkarSpinLock", numRuns, numItersPerRun, i);
@@ -211,6 +209,8 @@ void RunBenchmarks(data_input* dataInput)
         RunBenchmark<SpinRwLockNaive>("SpinRwLockNaive", numRuns, numItersPerRun, i);
         RunBenchmark<SpinRwLockNaivePerThreadReadCounts>("SpinRwLockNaivePerThreadReadCounts", numRuns, numItersPerRun, i);
 #endif
+        free_iovecs(i, dataInput);
+        
         std::cout << "\n";
     }
 

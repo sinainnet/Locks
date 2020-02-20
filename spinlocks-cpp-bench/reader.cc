@@ -10,7 +10,8 @@ using namespace std;
 #include "./header.h"
 
 #define THREADS		2
-#define data_len        two_gig_size
+// #define data_len        gig_size
+#define data_len        1024*1024
 
 
 int main(int argc, char **argv) {
@@ -31,7 +32,11 @@ int main(int argc, char **argv) {
         printf("reader: sudo ./main %d %p %llu\n", getpid(), data, data_len);
         
         // while (__sync_val_compare_and_swap(&shm->state, THREADS, 0) != THREADS);
-        while (1);
+        // while (1);
+        getchar();
+        FILE *file_res = fopen("h.txt", "w+");
+        fprintf(file_res, "\n%s\n", data);
+        // printf("hello\n%s\n", data);
         
         /* remove the shared memory object */
         // munmap(shm, 1);     

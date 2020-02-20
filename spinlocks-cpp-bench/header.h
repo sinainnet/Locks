@@ -153,7 +153,6 @@ void get_inputs (data_input *input_var, int argc, char **argv) {
 void build_iovecs(size_t threadNum, data_input *dataInput) {
         int local_iov_num = threadNum;
         long long int data_len = dataInput->buffer_length/local_iov_num;
-        // printf("build_iovecs:data_len = %lld\n", data_len);
 
         struct iovec* local = new iovec[local_iov_num];
         struct iovec* remote = new iovec[local_iov_num];
@@ -176,3 +175,18 @@ void build_iovecs(size_t threadNum, data_input *dataInput) {
 
         return;
 }
+
+void free_iovecs(size_t threadNum, data_input *dataInput) {
+        int local_iov_num = threadNum;
+        long long int data_len = dataInput->buffer_length/local_iov_num;
+
+        struct iovec* local = dataInput->local;
+
+        for (size_t i = 0; i < local_iov_num; i++)
+        {
+                /* code */
+                free(local[i].iov_base);
+        }
+        return;
+}
+
